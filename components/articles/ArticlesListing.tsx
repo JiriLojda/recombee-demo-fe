@@ -7,6 +7,7 @@ import { ArticleItem } from "../listingPage/ArticleItem";
 import { ArticlePageSize } from "../../lib/constants/paging";
 import { taxonomies } from "../../models/environment/taxonomies";
 import { Article } from "../../models/content-types/article";
+import { RecombeeSearchWidget } from "../recombee/RecombeeSearchWidget";
 
 type LinkButtonProps = {
   text: string;
@@ -104,86 +105,92 @@ export const ArticlesListing: FC<ArticlesLitingProps> = (props) => {
 
   return (
     <div className="md:px-4">
-        <h2 className="mt-4 px-6 md:px-0 md:mt-16">Latest Articles</h2>
-        <FilterOptions
-          options={filterOptions}
-          category={props.category}
-        />
-        <div className="flex flex-col flex-grow min-h-[500px]">
-          {props.articles.length > 0 ? (
-            <ul className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 place-items-center list-none gap-5 md:pt-4 pl-0 justify-center">
-              {props.articles.map(article => (
-                article.elements.type.value[0]?.codename && (
-                  <ArticleItem
-                    key={article.system.id}
-                    title={article.elements.title.value}
-                    itemId={article.system.id}
-                    description={article.elements.abstract.value}
-                    imageUrl={article.elements.hero_image.value[0]?.url || ""}
-                    publishingDate={article.elements.publishing_date.value}
-                    detailUrl={resolveUrlPath({
+      <div className="flex gap-25 items-center justify-stretch">
+        <h2 className="px-6 md:px-0 mt-10 mb-10">Latest Articles</h2>
+        <div className="grow">
+          <RecombeeSearchWidget />
+        </div>
+      </div>
+      <FilterOptions
+        options={filterOptions}
+        category={props.category}
+      />
+
+      <div className="flex flex-col flex-grow min-h-[500px]">
+        {props.articles.length > 0 ? (
+          <ul className="w-full grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 place-items-center list-none gap-5 md:pt-4 pl-0 justify-center">
+            {props.articles.map(article => (
+              article.elements.type.value[0]?.codename && (
+                <ArticleItem
+                  key={article.system.id}
+                  title={article.elements.title.value}
+                  itemId={article.system.id}
+                  description={article.elements.abstract.value}
+                  imageUrl={article.elements.hero_image.value[0]?.url || ""}
+                  publishingDate={article.elements.publishing_date.value}
+                  detailUrl={resolveUrlPath({
+                    type: "article",
+                    slug: article.elements.slug.value
+                  })}
+                />
+              )
+            ))}
+          </ul>
+        )
+          :
+          <div className="w-full flex my-auto grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 pt-4 pl-0 justify-center font-bold">No articles match this criteria.</div>
+        }
+
+        {pageCount > 1 && (
+          <nav>
+            <ul className="mr-14 sm:mr-0 flex flex-row flex-wrap list-none justify-center">
+              <li>
+                <LinkButton
+                  text="Previous"
+                  href={!props.pageNumber || props.pageNumber === 2
+                    ? resolveUrlPath({
                       type: "article",
-                      slug: article.elements.slug.value
-                    })}
-                  />
-                )
-              ))}
-            </ul>
-          )
-            :
-            <div className="w-full flex my-auto grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 pt-4 pl-0 justify-center font-bold">No articles match this criteria.</div>
-          }
+                      term: "all"
+                    })
+                    : resolveUrlPath({
+                      type: "article",
+                      term: props.category,
+                      page: props.pageNumber - 1
+                    } as ResolutionContext)}
+                  disabled={props.pageNumber === 1}
+                  roundLeft
+                />
 
-          {pageCount > 1 && (
-            <nav>
-              <ul className="mr-14 sm:mr-0 flex flex-row flex-wrap list-none justify-center">
-                <li>
+              </li>
+              {Array.from({ length: pageCount }).map((_, i) => (
+                <li key={i}>
                   <LinkButton
-                    text="Previous"
-                    href={!props.pageNumber || props.pageNumber === 2
-                      ? resolveUrlPath({
-                        type: "article",
-                        term: "all"
-                      })
-                      : resolveUrlPath({
-                        type: "article",
-                        term: props.category,
-                        page: props.pageNumber - 1
-                      } as ResolutionContext)}
-                    disabled={props.pageNumber === 1}
-                    roundLeft
-                  />
-
-                </li>
-                {Array.from({ length: pageCount }).map((_, i) => (
-                  <li key={i}>
-                    <LinkButton
-                      text={`${i + 1}`}
-                      href={resolveUrlPath({
-                        type: "article",
-                        term: props.category,
-                        page: i + 1 > 1 ? i + 1 : undefined
-                      } as ResolutionContext)}
-                      highlight={(props.pageNumber ?? 1) === i + 1}
-                    />
-                  </li>
-                ))}
-                <li>
-                  <LinkButton
-                    text="Next"
+                    text={`${i + 1}`}
                     href={resolveUrlPath({
                       type: "article",
                       term: props.category,
-                      page: props.pageNumber ? props.pageNumber + 1 : 2
+                      page: i + 1 > 1 ? i + 1 : undefined
                     } as ResolutionContext)}
-                    disabled={(props.pageNumber ?? 1) === pageCount}
-                    roundRight
+                    highlight={(props.pageNumber ?? 1) === i + 1}
                   />
                 </li>
-              </ul>
-            </nav>
-          )}
-        </div>
+              ))}
+              <li>
+                <LinkButton
+                  text="Next"
+                  href={resolveUrlPath({
+                    type: "article",
+                    term: props.category,
+                    page: props.pageNumber ? props.pageNumber + 1 : 2
+                  } as ResolutionContext)}
+                  disabled={(props.pageNumber ?? 1) === pageCount}
+                  roundRight
+                />
+              </li>
+            </ul>
+          </nav>
+        )}
       </div>
+    </div>
   )
 }
