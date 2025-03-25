@@ -7,7 +7,7 @@ import { ArticleItem } from "../listingPage/ArticleItem";
 import { ArticlePageSize } from "../../lib/constants/paging";
 import { taxonomies } from "../../models/environment/taxonomies";
 import { Article } from "../../models/content-types/article";
-import { RecombeeSearchWidget } from "../recombee/RecombeeSearchWidget";
+import { RecombeeArticlesSearchWidget } from "../recombee/RecombeeWidgets";
 
 type LinkButtonProps = {
   text: string;
@@ -108,7 +108,7 @@ export const ArticlesListing: FC<ArticlesLitingProps> = (props) => {
       <div className="flex gap-25 items-center justify-stretch">
         <h2 className="px-6 md:px-0 mt-10 mb-10">Latest Articles</h2>
         <div className="grow">
-          <RecombeeSearchWidget />
+          <RecombeeArticlesSearchWidget />
         </div>
       </div>
       <FilterOptions

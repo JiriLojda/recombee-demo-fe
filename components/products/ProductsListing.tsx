@@ -7,6 +7,7 @@ import { ProductsPageSize } from "../../lib/constants/paging";
 import { ProductItem } from "../listingPage/ProductItem";
 import { resolveUrlPath } from "../../lib/routing";
 import { updateSearchParams } from "../../lib/utils/searchParamsUtils";
+import { RecombeeProductsSearchWidget } from "../recombee/RecombeeWidgets";
 
 const ProductsListing: FC = () => {
   const router = useRouter();
@@ -117,7 +118,12 @@ const ProductsListing: FC = () => {
 
   return(
     <>
-      <h2 className="m-0 mt-16 ml-4 sm:ml-0">Surgical products</h2>
+      <div className="flex gap-25 items-center justify-stretch">
+        <h2 className="m-0 mt-10 mb-10">Surgical products</h2>
+        <div className="grow">
+          <RecombeeProductsSearchWidget />
+        </div>
+      </div>
 
       <div className="flex flex-col md:flex-row mt-4 md:gap-2 text-white">
         <div className="flex flex-col bg-mainBackgroundColor p-4">
