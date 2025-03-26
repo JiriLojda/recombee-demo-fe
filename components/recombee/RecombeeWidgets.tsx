@@ -1,15 +1,18 @@
 "use client";
 
 import Script from "next/script";
+import { useMemo } from "react";
 import { preinit } from "react-dom";
 
 export const RecombeeArticlesSearchWidget = () => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
+  const firstId = useRandomId();
+  const secondId = useRandomId();
 
   return (
     <>
-      <Script id="first-articlesSearch">{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q=recombeeIntegration.q||[]).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
-      <Script id="second-articlesSearch">{`
+      <Script id={firstId}>{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q=recombeeIntegration.q||[]).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
+      <Script id={secondId}>{`
       recombeeIntegration({
         type: "SetDefaults",
         databaseId: "kontent-ai-dev",
@@ -31,11 +34,13 @@ export const RecombeeArticlesSearchWidget = () => {
 
 export const RecombeeProductsSearchWidget = () => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
+  const firstId = useRandomId();
+  const secondId = useRandomId();
 
   return (
     <>
-      <Script id="first-prodctsSearch">{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q=recombeeIntegration.q||[]).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
-      <Script id="second-productsSearch">{`
+      <Script id={firstId}>{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q=recombeeIntegration.q||[]).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
+      <Script id={secondId}>{`
       recombeeIntegration({
         type: "SetDefaults",
         databaseId: "kontent-ai-dev",
@@ -57,11 +62,13 @@ export const RecombeeProductsSearchWidget = () => {
 
 export const RecombeeArticleRecommendationWidget = (props: Readonly<{ itemId: string; languageCodename: string }>) => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
+  const firstId = useRandomId();
+  const secondId = useRandomId();
 
   return (
     <>
-      <Script id="first-articlesRecommendation">{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q=recombeeIntegration.q||[]).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
-      <Script id="second-articlesRecommendation">
+      <Script id={firstId}>{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q=recombeeIntegration.q||[]).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
+      <Script id={secondId}>
         {`
         recombeeIntegration({
           type: "SetDefaults",
@@ -85,3 +92,34 @@ export const RecombeeArticleRecommendationWidget = (props: Readonly<{ itemId: st
     </>
   );
 };
+
+export const RecombeeProductRecommendationWidget = (props: Readonly<{ itemId: string; languageCodename: string }>) => {
+  preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
+  const firstId = useRandomId();
+  const secondId = useRandomId();
+
+  return (<>
+    <Script id={firstId}>{"window.recombeeIntegration=window.recombeeIntegration||function(){(recombeeIntegration.q = recombeeIntegration.q || []).push(arguments)};recombeeIntegration.l=+new Date;"}</Script>
+    <Script id={secondId}>{`
+      recombeeIntegration({
+      type: "SetDefaults",
+      databaseId: "kontent-ai-dev",
+      publicToken: "A8WBQFrxjfFZVb2Z4qzVcX8nMlSK0Tzst20qEb35ThhY66y4GbXdYydDyS7190y9",
+      rapiHostname: "client-rapi.recombee.com:443",
+      itemId: "${props.itemId}_${props.languageCodename}"
+      });
+      recombeeIntegration({
+        type: "AddDetailView"
+      });
+      recombeeIntegration({
+        type: "InitializeRecommendationWidget",
+      widgetId: "0568397d-7b25-4944-8762-4f98a0abb874",
+      rootElementId: "widget-root-0568397d-7b25-4944-8762-4f98a0abb874"
+      });
+    `}</Script>
+    <Script type="text/javascript" defer src="https://web-integration.recombee.com/v1/recombee.js"></Script>
+    <div id="widget-root-0568397d-7b25-4944-8762-4f98a0abb874"></div>
+  </>);
+};
+
+const useRandomId = () =>  useMemo(() => Math.random().toString(36), []);

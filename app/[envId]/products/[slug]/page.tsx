@@ -9,6 +9,7 @@ import { notFound } from "next/navigation";
 import { AppPage } from "../../../../components/shared/ui/appPage";
 import { Metadata } from "next";
 import { contentTypes } from "../../../../models/environment";
+import { RecombeeProductRecommendationWidget } from "../../../../components/recombee/RecombeeWidgets";
 
 const widthLimit = 300;
 
@@ -81,6 +82,10 @@ const ProductDetail = async ({params}: {params: Promise<{envId: string, slug: st
                 </button>
             </div>
           </div>
+          <section className="p-13">
+            <h2>Similar Products</h2>
+            <RecombeeProductRecommendationWidget itemId={product.system.id} languageCodename={product.system.language} />
+          </section>
     </AppPage >
 )};
 
