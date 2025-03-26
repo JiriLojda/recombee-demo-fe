@@ -10,6 +10,7 @@ import { previewApiKeyCookieName } from "../../../../lib/constants/cookies";
 import { notFound } from "next/navigation";
 import { AppPage } from "../../../../components/shared/ui/appPage";
 import { Metadata } from "next";
+import { RecombeeArticleRecommendationWidget } from "../../../../components/recombee/RecombeeWidgets";
 
 const ArticlePage = async ({params}: {params: Promise<{envId: string, slug: string}>}) => {
   const envId = (await params).envId;
@@ -61,6 +62,14 @@ const ArticlePage = async ({params}: {params: Promise<{envId: string, slug: stri
           element={article.elements.content}
           isInsideTable={false}
         />
+        <div className="mb-8">
+          <h3 className="scroll-mt-20 heading">
+            <a className="border-mainAnchorColor" href="#similar-articles">
+              Similar Articles
+            </a>
+          </h3>
+          <RecombeeArticleRecommendationWidget itemId={article.system.id} languageCodename={article.system.language} />
+        </div>
       </div>
     </AppPage>
   );
