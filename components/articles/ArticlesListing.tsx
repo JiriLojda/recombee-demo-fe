@@ -8,6 +8,7 @@ import { ArticlePageSize } from "../../lib/constants/paging";
 import { taxonomies } from "../../models/environment/taxonomies";
 import { Article } from "../../models/content-types/article";
 import { RecombeeArticlesSearchWidget } from "../recombee/RecombeeWidgets";
+import { useSearchParams } from "next/navigation";
 
 type LinkButtonProps = {
   text: string;
@@ -91,15 +92,17 @@ const FilterOptions: FC<FilterOptionProps> = ({ options, category }) => {
   );
 };
 
-type ArticlesLitingProps = {
+type ArticlesLitingProps = Readonly<{
   pageNumber: number
   category: string
   articles: ReadonlyArray<Article>
   itemCount: number;
-}
+}>;
 
 export const ArticlesListing: FC<ArticlesLitingProps> = (props) => {
   const filterOptions = getFilterOptions();
+
+  const searchParams = useSearchParams();
 
   const pageCount = Math.ceil(props.itemCount / ArticlePageSize);
 
@@ -108,7 +111,7 @@ export const ArticlesListing: FC<ArticlesLitingProps> = (props) => {
       <div className="flex gap-25 items-center justify-stretch">
         <h2 className="px-6 md:px-0 mt-10 mb-10">Latest Articles</h2>
         <div className="grow">
-          <RecombeeArticlesSearchWidget />
+          <RecombeeArticlesSearchWidget initialSearchQuery={searchParams.get("searchQuery")} />
         </div>
       </div>
       <FilterOptions

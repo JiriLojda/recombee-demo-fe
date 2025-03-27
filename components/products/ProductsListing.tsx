@@ -55,7 +55,7 @@ const ProductsListing: FC = () => {
 
   useEffect(() => {
     getProductCategories();
-  }, [getProductCategories])
+  }, [getProductCategories]);
 
   const onPreviousClick = () => {
     if (pageNumber === 2) {
@@ -121,7 +121,7 @@ const ProductsListing: FC = () => {
       <div className="flex gap-25 items-center justify-stretch">
         <h2 className="m-0 mt-10 mb-10">Surgical products</h2>
         <div className="grow">
-          <RecombeeProductsSearchWidget />
+          <RecombeeProductsSearchWidget initialSearchQuery={searchParams.get("searchQuery")} />
         </div>
       </div>
 

@@ -1,0 +1,1 @@
+export const recombeeUserIdCookieName = "_rcmbid";

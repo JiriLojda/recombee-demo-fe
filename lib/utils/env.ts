@@ -32,3 +32,17 @@ export const managementApiDomain = NEXT_PUBLIC_KONTENT_DOMAIN ? `https://manage.
 export const internalApiDomain = NEXT_PUBLIC_KONTENT_DOMAIN ? `https://app.${NEXT_PUBLIC_KONTENT_DOMAIN}` : NEXT_PUBLIC_KONTENT_IAPI_DOMAIN;
 
 export const authApiDomain = NEXT_PUBLIC_KONTENT_DOMAIN ? `login.${NEXT_PUBLIC_KONTENT_DOMAIN}` : NEXT_PUBLIC_KONTENT_AUTH_DOMAIN;
+
+const NEXT_PUBLIC_RECOMBEE_DATABASE_ID = process.env.NEXT_PUBLIC_RECOMBEE_DATABASE_ID;
+const NEXT_PUBLIC_RECOMBEE_PUBLIC_TOKEN = process.env.NEXT_PUBLIC_RECOMBEE_PUBLIC_TOKEN;
+
+if (!NEXT_PUBLIC_RECOMBEE_DATABASE_ID) {
+  throw new Error(`Environment variable NEXT_PUBLIC_RECOMBEE_DATABASE_ID is missing`);
+}
+
+if (!NEXT_PUBLIC_RECOMBEE_PUBLIC_TOKEN) {
+  throw new Error(`Environment variable NEXT_PUBLIC_RECOMBEE_PUBLIC_TOKEN is missing`);
+}
+
+export const recombeeDatabaseId = NEXT_PUBLIC_RECOMBEE_DATABASE_ID;
+export const recombeePublicToken = NEXT_PUBLIC_RECOMBEE_PUBLIC_TOKEN;

@@ -1,9 +1,7 @@
 import { Content } from "../../../../../../../components/shared/Content";
-import { ArticlePageSize } from "../../../../../../../lib/constants/paging";
 import { getArticlesCountByCategory, getArticlesForListing, getDefaultMetadata, getItemBySlug, getItemsTotalCount } from "../../../../../../../lib/kontentClient";
 import { ArticleTypeWithAll, categoryFilterSource, isArticleType } from "../../../../../../../lib/utils/articlesListing";
 import { parseFlatted,  stringifyAsType } from "../../../../../../../lib/utils/circularityUtils";
-import { defaultEnvId } from "../../../../../../../lib/utils/env";
 import { WSL_Page } from "../../../../../../../models/content-types";
 import { notFound } from "next/navigation";
 import { cookies, draftMode } from "next/headers";
@@ -12,9 +10,16 @@ import { AppPage } from "../../../../../../../components/shared/ui/appPage";
 import { ArticlesListing } from "../../../../../../../components/articles/ArticlesListing";
 import { Metadata } from "next";
 import { contentTypes } from "../../../../../../../models/environment";
+import { recombeeUserIdCookieName } from "../../../../../../../lib/constants/recombee";
+import { defaultEnvId } from "../../../../../../../lib/utils/env";
+import { ArticlePageSize } from "../../../../../../../lib/constants/paging";
 
+type PageType = {
+  readonly params: Promise<{envId: string, page: string, category: string, searchQuery: string}>,
+  readonly searchParams: Promise<{searchQuery?: string}>,
+}
 
-const ArticlesPagingPage = async ({params}: {params: Promise<{envId: string, page: string, category: string}>}) => {
+const ArticlesPagingPage = async ({params, searchParams}: PageType) => {
   const envId = (await params).envId
 
   const pageURLParameter = (await params).page;
@@ -28,7 +33,14 @@ const ArticlesPagingPage = async ({params}: {params: Promise<{envId: string, pag
   const previewApiKey = draft.isEnabled ? (await cookies()).get(previewApiKeyCookieName)?.value : undefined;
 
   const pageNumber = !pageURLParameter || isNaN(+pageURLParameter) ? 1 : +pageURLParameter;
-  const articlesData = await getArticlesForListing({ envId, previewApiKey }, draft.isEnabled, pageNumber, selectedCategory);
+  const articlesData = await getArticlesForListing({ 
+    config: { envId, previewApiKey },
+    usePreview: draft.isEnabled, 
+    pageNumber, 
+    category: selectedCategory,
+    searchQuery: (await searchParams).searchQuery,
+    userId: (await cookies()).get(recombeeUserIdCookieName)?.value
+   });
   const pageData = await getItemBySlug<WSL_Page>({ envId, previewApiKey }, "articles", contentTypes.page.codename, draft.isEnabled);
   const itemCount = await getArticlesCountByCategory({ envId, previewApiKey }, draft.isEnabled, selectedCategory)
 

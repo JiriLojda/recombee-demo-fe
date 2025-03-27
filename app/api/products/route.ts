@@ -1,13 +1,15 @@
 import { NextRequest } from "next/server";
 import { cookies, draftMode } from "next/headers";
 import { envIdCookieName, previewApiKeyCookieName } from "../../../lib/constants/cookies";
-import { getProductsForListing } from "../../../lib/kontentClient";
+import { getProductsForListing, getProductsForSearch } from "../../../lib/kontentClient";
+import { recombeeUserIdCookieName } from "../../../lib/constants/recombee";
 
 export const GET = async (req: NextRequest) => {
   const searchParams = req.nextUrl.searchParams;
 
   const category = searchParams.getAll("category");
   const page = searchParams.get("page");
+  const searchQuery = searchParams.get("searchQuery");
 
   const pageNumber = parseInt(page as string)
 
@@ -29,8 +31,15 @@ export const GET = async (req: NextRequest) => {
   if (usePreview && !currentPreviewApiKey) {
     return new Response("Missing previewApiKey cookie", {status: 400})
   }
+  
+  const clientConfig = { 
+    envId: currentEnvId.value, 
+    previewApiKey: currentPreviewApiKey?.value 
+  };
 
-  const products = await getProductsForListing({ envId: currentEnvId.value, previewApiKey: currentPreviewApiKey?.value }, usePreview, isNaN(pageNumber) ? undefined : pageNumber, category.length ? category : undefined);
+  const products = searchQuery 
+  ? await getProductsForSearch(clientConfig, usePreview, searchQuery, cookiesList.get(recombeeUserIdCookieName)?.value)
+  : await getProductsForListing(clientConfig, usePreview, isNaN(pageNumber) ? undefined : pageNumber, category.length ? category : undefined);
 
   return Response.json({ products: products.items, totalCount: products.pagination.totalCount });
 };

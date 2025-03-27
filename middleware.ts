@@ -84,7 +84,7 @@ const handleEmptyApiKeyCookie = (currentEnvId: string) => (prevResponse: NextRes
 };
 
 const handleArticlesRoute = (currentEnvId: string) => (prevResponse: NextResponse, request: NextRequest) => request.nextUrl.pathname === '/articles'
-  ? NextResponse.rewrite(new URL(`/${currentEnvId}/articles/category/all/page/1`, request.url))
+  ? NextResponse.rewrite(new URL(createUrlWithQueryString(`/${currentEnvId}/articles/category/all/page/1`, request.nextUrl.searchParams.entries()), request.url))
   : prevResponse;
 
 const handleArticlesCategoryRoute = (prevReponse: NextResponse, request: NextRequest) => request.nextUrl.pathname === '/articles/category/all'
@@ -94,7 +94,7 @@ const handleArticlesCategoryRoute = (prevReponse: NextResponse, request: NextReq
 
 const handleArticlesCategoryWithNoPaginationRoute = (currentEnvId: string) => (prevResponse: NextResponse, request: NextRequest) => /^\/articles\/category\/[^/]+$/.test(request.nextUrl.pathname)
   // If there is no pagination, but category provided - add the first page ti URL path
-  ? NextResponse.rewrite(new URL(`/${currentEnvId}${request.nextUrl.pathname}/page/1`, request.url))
+  ? NextResponse.rewrite(new URL(createUrlWithQueryString(`/${currentEnvId}${request.nextUrl.pathname}/page/1`, request.nextUrl.searchParams.entries()), request.url))
   : prevResponse
 
 const handleEmptyCookies = (prevResponse: NextResponse, request: NextRequest) => {

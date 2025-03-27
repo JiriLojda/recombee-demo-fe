@@ -4,7 +4,16 @@ import Script from "next/script";
 import { useMemo } from "react";
 import { preinit } from "react-dom";
 
-export const RecombeeArticlesSearchWidget = () => {
+type SearchWidgetProps = {
+  readonly initialSearchQuery: string | null;
+};
+
+type RecommendationWidgetProps = {
+  readonly itemId: string;
+  readonly languageCodename: string;
+};
+
+export const RecombeeArticlesSearchWidget = (props: SearchWidgetProps) => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
   const firstId = useRandomId();
   const secondId = useRandomId();
@@ -24,6 +33,8 @@ export const RecombeeArticlesSearchWidget = () => {
         widgetId: "580e86f4-f625-43be-aac2-775ba3191676",
         rootElementId: "widget-root-580e86f4-f625-43be-aac2-775ba3191676"
       });
+
+      ${createAddDefaultValueToSearchInputScript(props.initialSearchQuery, "580e86f4-f625-43be-aac2-775ba3191676")}
       `}
       </Script>
       <Script type="text/javascript" defer src="https://web-integration.recombee.com/v1/recombee.js"></Script>
@@ -32,7 +43,7 @@ export const RecombeeArticlesSearchWidget = () => {
   );
 };
 
-export const RecombeeProductsSearchWidget = () => {
+export const RecombeeProductsSearchWidget = (props: SearchWidgetProps) => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
   const firstId = useRandomId();
   const secondId = useRandomId();
@@ -52,6 +63,8 @@ export const RecombeeProductsSearchWidget = () => {
         widgetId: "4221fed8-a116-44be-a0ba-952ec4616cd1",
         rootElementId: "widget-root-4221fed8-a116-44be-a0ba-952ec4616cd1"
       });
+
+      ${createAddDefaultValueToSearchInputScript(props.initialSearchQuery, "4221fed8-a116-44be-a0ba-952ec4616cd1")}
       `}
       </Script>
       <Script type="text/javascript" defer src="https://web-integration.recombee.com/v1/recombee.js"></Script>
@@ -60,7 +73,7 @@ export const RecombeeProductsSearchWidget = () => {
   );
 };
 
-export const RecombeeArticleRecommendationWidget = (props: Readonly<{ itemId: string; languageCodename: string }>) => {
+export const RecombeeArticleRecommendationWidget = (props: RecommendationWidgetProps) => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
   const firstId = useRandomId();
   const secondId = useRandomId();
@@ -93,7 +106,7 @@ export const RecombeeArticleRecommendationWidget = (props: Readonly<{ itemId: st
   );
 };
 
-export const RecombeeProductRecommendationWidget = (props: Readonly<{ itemId: string; languageCodename: string }>) => {
+export const RecombeeProductRecommendationWidget = (props: RecommendationWidgetProps) => {
   preinit("https://web-integration.recombee.com/v1/recombee.js", { as: "script" });
   const firstId = useRandomId();
   const secondId = useRandomId();
@@ -123,3 +136,20 @@ export const RecombeeProductRecommendationWidget = (props: Readonly<{ itemId: st
 };
 
 const useRandomId = () =>  useMemo(() => Math.random().toString(36), []);
+
+const createAddDefaultValueToSearchInputScript = (initialSearchQuery: string | null, widgetId: string) => `
+  if("${initialSearchQuery || ""}") {
+    const observer = new MutationObserver(() => {
+      const inputElement = document.getElementsByName("searchQuery")[0];
+      if (inputElement && !inputElement.value) {
+        inputElement.value = "${initialSearchQuery}";
+      }
+    });
+    
+    observer.observe(document.getElementById("widget-root-${widgetId}"), { childList: true });
+
+    setTimeout(() => {
+      observer.disconnect();
+    }, 5000);
+  }
+`;

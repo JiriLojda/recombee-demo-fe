@@ -5,6 +5,7 @@ import { ArticlePageSize, ProductsPageSize } from './constants/paging';
 import { ArticleTypeWithAll } from './utils/articlesListing';
 import { defaultEnvId, deliveryApiDomain, deliveryPreviewApiDomain, siteCodename } from './utils/env';
 import { contentTypes, contentTypeSnippets } from '../models/environment';
+import { searchArticles, searchProducts } from './recombeeClient';
 
 const sourceTrackingHeaderName = 'X-KC-SOURCE';
 const defaultDepth = 10;
@@ -71,6 +72,12 @@ export const getHomepage = (config: ClientConfig, usePreview: boolean) =>
     .depthParameter(defaultDepth)
     .toPromise()
     .then(res => res.data.items[0] as WSL_WebSpotlightRoot | undefined)
+
+export const getProductsForSearch = async (config: ClientConfig, usePreview: boolean, searchQuery: string, userId: string | undefined) => {
+  const foundIds = await searchProducts(searchQuery, userId);
+
+  return getItemsByIds(config, foundIds, contentTypes.product.codename, usePreview);
+};
 
 export const getProductsForListing = async (config: ClientConfig, usePreview: boolean, page?: number, categories?: string[], pageSize: number = ProductsPageSize) => {
   const query = getDeliveryClient(config)
@@ -159,27 +166,46 @@ export const getSiteMenu = async (config: ClientConfig, usePreview: boolean) => 
     .then(item => item?.elements.navigation.linkedItems[0] || null)
 }
 
-export const getArticlesForListing = (config: ClientConfig, usePreview: boolean, page?: number, articleType?: string, pageSize: number = ArticlePageSize) => {
-  const query = getDeliveryClient(config)
+type ArticlesListingParams = Readonly<{
+  config: ClientConfig,
+  usePreview: boolean,
+  pageNumber: number,
+  category: string,
+  pageSize?: number,
+  searchQuery: string | undefined,
+  userId: string | undefined,
+}>;
+
+export const getArticlesForListing = async (params: ArticlesListingParams) => {
+  const pageSize = params.pageSize ?? ArticlePageSize;
+
+  const query = getDeliveryClient(params.config)
     .items<Article>()
     .type(contentTypes.article.codename)
     .collections([siteCodename, "default"])
     .orderByDescending(`elements.${contentTypes.article.elements.publishing_date.codename}`)
     .queryConfig({
-      usePreviewMode: usePreview,
-      waitForLoadingNewContent: usePreview
+      usePreviewMode: params.usePreview,
+      waitForLoadingNewContent: params.usePreview
     })
     .limitParameter(pageSize)
 
-  if (page) {
-    query.skipParameter((page - 1) * pageSize)
+  if (params.pageNumber) {
+    query.skipParameter((params.pageNumber - 1) * pageSize)
   }
 
-  if (articleType && articleType !== 'all') {
-    query.containsFilter(`elements.${contentTypes.article.elements.type.codename}`, [articleType])
+  if (params.category && params.category !== 'all') {
+    query.containsFilter(`elements.${contentTypes.article.elements.type.codename}`, [params.category])
+  }
+
+  if (params.searchQuery) {
+    const foundIds = await searchArticles(params.searchQuery, params.userId);
+
+    query.inFilter("system.id", foundIds);
   }
 
   query.includeTotalCountParameter();
+
   return query
     .toPromise()
     .then(res => res.data);
@@ -320,3 +346,16 @@ export const getPagesSlugs = (config: ClientConfig) =>
     .elementsParameter([contentTypes.page.elements.slug.codename])
     .toAllPromise()
     .then(res => res.data.items.map(item => item.elements.slug.value));
+
+const getItemsByIds = (config: ClientConfig, ids: string[], type: string, usePreview: boolean) =>
+  getDeliveryClient(config)
+    .items()
+    .type(type)
+    .languageParameter("default")
+    .inFilter("system.id", ids)
+    .queryConfig({
+      usePreviewMode: usePreview,
+      waitForLoadingNewContent: usePreview
+    })
+    .toPromise()
+    .then(res => res.data)
